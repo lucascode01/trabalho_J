@@ -1,5 +1,44 @@
 #include "game.h"
 
+// Protótipo para alternar modos
+void toggleGameMode(bool *mode);
+
+// Função para desenhar a tela inicial
+void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame, bool *gameMode) {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);  // Cor de fundo (preto)
+    SDL_RenderClear(renderer);
+
+    // Texto para "Iniciar Jogo"
+    SDL_Color textColor = {255, 255, 255};  // Cor branca
+    SDL_Surface *textSurface = TTF_RenderText_Solid(font, "Iniciar Jogo", textColor);
+    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect textRect = {WIDTH / 2 - textSurface->w / 2, HEIGHT / 3, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    // Texto para "Alternar Modo de Jogo"
+    textSurface = TTF_RenderText_Solid(font, "Alternar Modo de Jogo", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect modeTextRect = {WIDTH / 2 - textSurface->w / 2, HEIGHT / 2, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, NULL, &modeTextRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    // Texto para mostrar o modo atual
+    char modeStatus[30];
+    sprintf(modeStatus, "Modo: %s", (*gameMode) ? "Alternativo" : "Padrão");
+    textSurface = TTF_RenderText_Solid(font, modeStatus, textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect modeStatusRect = {WIDTH / 2 - textSurface->w / 2, HEIGHT / 1.5, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, NULL, &modeStatusRect);
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    // Exibir a tela
+    SDL_RenderPresent(renderer);
+}
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -54,7 +93,8 @@ int main(int argc, char *argv[]) {
 
     // Tela inicial
     bool startGame = false;
-    drawStartScreen(renderer, font, &startGame);
+    bool gameMode = false; // Modo de jogo: false = modo padrão, true = modo alternativo
+    drawStartScreen(renderer, font, &startGame, &gameMode);
 
     // Inicialização do jogo
     Snake snake;
@@ -63,10 +103,9 @@ int main(int argc, char *argv[]) {
 
     // Configuração inicial das fases
     int currentPhase = 1;
-    char phaseFile[500];  // Garantir que o buffer tenha tamanho suficiente
+    char phaseFile[500];  // Buffer ajustado para tamanho seguro
     sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
 
-    // Debug: Verificando o caminho do arquivo
     printf("Tentando abrir o arquivo: %s\n", phaseFile);
 
     Phase phase;
@@ -119,6 +158,10 @@ int main(int argc, char *argv[]) {
                             snake.dy = 0;
                         }
                         break;
+                    case SDLK_m:  // Tecla 'm' para alternar o modo
+                        toggleGameMode(&gameMode);
+                        drawStartScreen(renderer, font, &startGame, &gameMode); // Atualiza a tela
+                        break;
                 }
             }
         }
@@ -146,12 +189,12 @@ int main(int argc, char *argv[]) {
                         running = false;
                     } else {
                         printf("Fase %d carregada!\n", currentPhase);
-                        init(&snake, &food);  // Reinicializa o jogo para a nova fase
+                        init(&snake, &food);  // Reinicializa para nova fase
                     }
                 }
             }
 
-            draw(renderer, &snake, &food, &phase); // Adiciona obstáculos ao desenho
+            draw(renderer, &snake, &food, &phase); 
             lastTick = currentTick;
         }
     }
@@ -164,4 +207,10 @@ int main(int argc, char *argv[]) {
     SDL_Quit();
 
     return 0;
+}
+
+// Implementação de alternar modos
+void toggleGameMode(bool *mode) {
+    *mode = !*mode;
+    printf("Modo de jogo alternado: %s\n", (*mode) ? "Ativado" : "Desativado");
 }
