@@ -1,6 +1,7 @@
-velocidade=2
+velocidade=150
 pontos=10
-obstáculos=3
-100 100
-200 200
-300 300
+obstáculos=4
+50 50
+300 100
+150 300
+400 200
