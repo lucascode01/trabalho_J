@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 
     // Variáveis para controle de seleção de opções do menu
     bool startGame = false;
+
     bool gameMode = false;  // Variável para alternar o modo de jogo
     bool showStats = false; // Variável para exibir estatísticas
     int currentPhase = 1;
@@ -86,6 +87,7 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     Uint32 lastTick = SDL_GetTicks();
 
+    // Loop principal do jogo
     while (running) {
         // Processar eventos
         while (SDL_PollEvent(&event)) {
@@ -129,7 +131,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Desenha a tela inicial e o menu
-        drawStartScreen(renderer, font, &startGame, &gameMode, &showStats);
+        drawStartScreen(renderer, font, &startGame);
 
         // Se o jogo está pronto para começar
         if (startGame) {
@@ -139,6 +141,8 @@ int main(int argc, char *argv[]) {
 
                 if (checkCollision(&snake)) {
                     printf("Fim de jogo! Sua pontuação: %d\n", score);
+                    update_statistics(0, score);  // Atualiza as estatísticas no final do jogo
+                    show_statistics();            // Exibe as estatísticas
                     running = false;
                     break;
                 }
@@ -153,6 +157,8 @@ int main(int argc, char *argv[]) {
 
                         if (!loadPhase(phaseFile, &phase)) {
                             printf("Parabéns! Você completou todas as fases!\n");
+                            update_statistics(score, score);  // Atualiza as estatísticas
+                            show_statistics();               // Exibe as estatísticas
                             running = false;
                         } else {
                             printf("Fase %d carregada!\n", currentPhase);

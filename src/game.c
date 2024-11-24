@@ -147,16 +147,16 @@ void draw(SDL_Renderer *renderer, Snake *snake, Food *food, Phase *phase) {
 }
 
 void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame) {
-    // Clear screen and set background color
+    // Limpa a tela e define a cor de fundo
     SDL_SetRenderDrawColor(renderer, 78, 1, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Draw button
+    // Desenha o botão
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_Rect buttonRect = {WIDTH / 2 - 100, HEIGHT / 2 - 25, 200, 50};
     SDL_RenderFillRect(renderer, &buttonRect);
 
-    // Render text on button
+    // Renderiza o texto no botão
     SDL_Color white = {255, 255, 255, 255};
     SDL_Surface *textSurface = TTF_RenderText_Blended(font, "Iniciar Jogo", white);
     SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -167,9 +167,9 @@ void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame) {
     SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
     SDL_DestroyTexture(textTexture);
 
-    SDL_RenderPresent(renderer);  // Update screen
+    SDL_RenderPresent(renderer);  // Atualiza a tela
 
-    // Wait for user to click or quit
+    // Espera o usuário clicar ou sair
     SDL_Event event;
     while (!*startGame) {
         while (SDL_PollEvent(&event)) {
