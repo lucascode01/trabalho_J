@@ -5,29 +5,8 @@
 #include <time.h>
 #include <string.h>
 
-// Variáveis globais para estatísticas
-static int total_apples = 0;
-static int total_movements = 0;
 
-// Inicializa as estatísticas (caso necessário no início do programa)
-void init_statistics() {
-    total_apples = 0;
-    total_movements = 0;
-}
 
-// Atualiza as estatísticas após cada partida
-void update_statistics(int apples_eaten, int movements) {
-    total_apples += apples_eaten;
-    total_movements += movements;
-}
-
-// Exibe as estatísticas no terminal
-void show_statistics() {
-    printf("\n=== Estatísticas ===\n");
-    printf("Maçãs coletadas: %d\n", total_apples);
-    printf("Movimentos realizados: %d\n", total_movements);
-    printf("====================\n\n");
-}
 
 bool loadPhase(const char *phaseFile, Phase *phase) {
     FILE *file = fopen(phaseFile, "r");
