@@ -7,8 +7,8 @@
 
 
 
-
-bool loadPhase(const char *phaseFile, Phase *phase) {
+// deu bom
+bool loadPhase(const char *phaseFile, Phase *phase) { 
     FILE *file = fopen(phaseFile, "r");
 
     if (!file) {
