@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Desenha a tela inicial e o menu
-        drawStartScreen(renderer, font, &startGame, &gameMode, &showStats);
+        drawStartScreen(renderer, font, &startGame);  // Corrigido para passar apenas 3 parâmetros
 
         // Se o jogo está pronto para começar
         if (startGame) {
