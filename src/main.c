@@ -134,7 +134,11 @@ int main(int argc, char *argv[]) {
         }
 
         // Desenha a tela inicial e o menu
+<<<<<<< HEAD
         drawStartScreen(renderer, font, &startGame);  // Corrigido para passar apenas 3 parâmetros
+=======
+        drawStartScreen(renderer, font, &startGame, &gameMode, &showStats);
+>>>>>>> parent of 9edfdb4 (Correção de Bugs)
 
         // Se o jogo está pronto para começar
         if (startGame) {
