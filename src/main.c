@@ -52,16 +52,15 @@ int main(int argc, char *argv[]) {
         printf("Fonte carregada com sucesso.\n");
     }
 
-    // Tela inicial
-    bool startGame = false;
-    drawStartScreen(renderer, font, &startGame);  // Chamando a função com 3 parâmetros
-
     // Inicialização do jogo
     Snake snake;
     Food food;
     init(&snake, &food);
 
-    // Configuração inicial das fases
+    // Variáveis para controle de seleção de opções do menu
+    bool startGame = false;
+    bool gameMode = false;  // Variável para alternar o modo de jogo
+    bool showStats = false; // Variável para exibir estatísticas
     int currentPhase = 1;
     char phaseFile[500];  // Buffer ajustado para tamanho seguro
     sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
@@ -88,6 +87,7 @@ int main(int argc, char *argv[]) {
     Uint32 lastTick = SDL_GetTicks();
 
     while (running) {
+        // Processar eventos
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
@@ -118,40 +118,52 @@ int main(int argc, char *argv[]) {
                             snake.dy = 0;
                         }
                         break;
+                    case SDLK_RETURN:  // Aperta ENTER para alternar entre modos de jogo
+                        gameMode = !gameMode;
+                        break;
+                    case SDLK_s:  // Aperta "S" para mostrar as estatísticas
+                        showStats = !showStats;
+                        break;
                 }
             }
         }
 
-        Uint32 currentTick = SDL_GetTicks();
-        if ((int)(currentTick - lastTick) > phase.snake_speed) {
-            moveSnake(&snake);
+        // Desenha a tela inicial e o menu
+        drawStartScreen(renderer, font, &startGame, &gameMode, &showStats);
 
-            if (checkCollision(&snake)) {
-                printf("Fim de jogo! Sua pontuação: %d\n", score);
-                running = false;
-                break;
-            }
+        // Se o jogo está pronto para começar
+        if (startGame) {
+            Uint32 currentTick = SDL_GetTicks();
+            if ((int)(currentTick - lastTick) > phase.snake_speed) {
+                moveSnake(&snake);
 
-            if (checkFoodCollision(&snake, &food)) {
-                score++;
-                printf("Pontuação: %d\n", score);
+                if (checkCollision(&snake)) {
+                    printf("Fim de jogo! Sua pontuação: %d\n", score);
+                    running = false;
+                    break;
+                }
 
-                if (score >= phase.food_points) {
-                    currentPhase++;
-                    sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
+                if (checkFoodCollision(&snake, &food)) {
+                    score++;
+                    printf("Pontuação: %d\n", score);
 
-                    if (!loadPhase(phaseFile, &phase)) {
-                        printf("Parabéns! Você completou todas as fases!\n");
-                        running = false;
-                    } else {
-                        printf("Fase %d carregada!\n", currentPhase);
-                        init(&snake, &food);  // Reinicializa para nova fase
+                    if (score >= phase.food_points) {
+                        currentPhase++;
+                        sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
+
+                        if (!loadPhase(phaseFile, &phase)) {
+                            printf("Parabéns! Você completou todas as fases!\n");
+                            running = false;
+                        } else {
+                            printf("Fase %d carregada!\n", currentPhase);
+                            init(&snake, &food);  // Reinicializa para nova fase
+                        }
                     }
                 }
-            }
 
-            draw(renderer, &snake, &food, &phase); 
-            lastTick = currentTick;
+                draw(renderer, &snake, &food, &phase); 
+                lastTick = currentTick;
+            }
         }
     }
 
