@@ -1,5 +1,8 @@
 #include "game.h"
 
+#define WIDTH 1280   // Definindo a largura da janela
+#define HEIGHT 720   // Definindo a altura da janela
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -19,6 +22,7 @@ int main(int argc, char *argv[]) {
         printf("SDL_ttf Inicializado com sucesso.\n");
     }
 
+    // Criando a janela com as dimensões corretas
     SDL_Window *window = SDL_CreateWindow("Jogo da Cobrinha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
     if (!window) {
         printf("Erro ao criar a janela SDL: %s\n", SDL_GetError());
@@ -40,6 +44,7 @@ int main(int argc, char *argv[]) {
         printf("Renderizador SDL criado com sucesso.\n");
     }
 
+    // Carregando a fonte
     TTF_Font *font = TTF_OpenFont("/System/Library/Fonts/Supplemental/Arial.ttf", 24);
     if (!font) {
         printf("Erro ao abrir a fonte: %s\n", TTF_GetError());
@@ -59,7 +64,6 @@ int main(int argc, char *argv[]) {
 
     // Variáveis para controle de seleção de opções do menu
     bool startGame = false;
-
     bool gameMode = false;  // Variável para alternar o modo de jogo
     bool showStats = false; // Variável para exibir estatísticas
     int currentPhase = 1;
@@ -87,7 +91,6 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     Uint32 lastTick = SDL_GetTicks();
 
-    // Loop principal do jogo
     while (running) {
         // Processar eventos
         while (SDL_PollEvent(&event)) {
@@ -131,7 +134,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Desenha a tela inicial e o menu
-        drawStartScreen(renderer, font, &startGame);
+        drawStartScreen(renderer, font, &startGame, &gameMode, &showStats);
 
         // Se o jogo está pronto para começar
         if (startGame) {
@@ -141,8 +144,6 @@ int main(int argc, char *argv[]) {
 
                 if (checkCollision(&snake)) {
                     printf("Fim de jogo! Sua pontuação: %d\n", score);
-                    update_statistics(0, score);  // Atualiza as estatísticas no final do jogo
-                    show_statistics();            // Exibe as estatísticas
                     running = false;
                     break;
                 }
@@ -157,8 +158,6 @@ int main(int argc, char *argv[]) {
 
                         if (!loadPhase(phaseFile, &phase)) {
                             printf("Parabéns! Você completou todas as fases!\n");
-                            update_statistics(score, score);  // Atualiza as estatísticas
-                            show_statistics();               // Exibe as estatísticas
                             running = false;
                         } else {
                             printf("Fase %d carregada!\n", currentPhase);
