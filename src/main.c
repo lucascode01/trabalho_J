@@ -141,18 +141,19 @@ int main(int argc, char *argv[]) {
                     currentPhase++;
                     sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
 
-                    if (!loadPhase(phaseFile, &phase)) {
-                        printf("Parabéns! Você completou todas as fases!\n");
-                        running = false;
-                    } else {
-                        printf("Fase %d carregada!\n", currentPhase);
-                        init(&snake, &food);  // Reinicializa o jogo para a nova fase
+                        if (!loadPhase(phaseFile, &phase)) {
+                            printf("Parabéns! Você completou todas as fases!\n");
+                            running = false;
+                        } else {
+                            printf("Fase %d carregada!\n", currentPhase);
+                            init(&snake, &food);  // Reinicializa para nova fase
+                        }
                     }
                 }
-            }
 
-            draw(renderer, &snake, &food, &phase); // Adiciona obstáculos ao desenho
-            lastTick = currentTick;
+                draw(renderer, &snake, &food, &phase); 
+                lastTick = currentTick;
+            }
         }
     }
 

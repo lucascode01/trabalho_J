@@ -8,7 +8,11 @@
 
 
 
+<<<<<<< HEAD
 bool loadPhase(const char *phaseFile, Phase *phase) {
+=======
+bool loadPhase(const char *phaseFile, Phase *phase) { 
+>>>>>>> 4d63c54a1327204010a2f600e22abadd2e94b162
     FILE *file = fopen(phaseFile, "r");
 
     if (!file) {
