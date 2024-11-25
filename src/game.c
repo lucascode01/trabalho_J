@@ -5,29 +5,8 @@
 #include <time.h>
 #include <string.h>
 
-// Variáveis globais para estatísticas
-static int total_apples = 0;
-static int total_movements = 0;
 
-// Inicializa as estatísticas (caso necessário no início do programa)
-void init_statistics() {
-    total_apples = 0;
-    total_movements = 0;
-}
 
-// Atualiza as estatísticas após cada partida
-void update_statistics(int apples_eaten, int movements) {
-    total_apples += apples_eaten;
-    total_movements += movements;
-}
-
-// Exibe as estatísticas no terminal
-void show_statistics() {
-    printf("\n=== Estatísticas ===\n");
-    printf("Maçãs coletadas: %d\n", total_apples);
-    printf("Movimentos realizados: %d\n", total_movements);
-    printf("====================\n\n");
-}
 
 bool loadPhase(const char *phaseFile, Phase *phase) {
     FILE *file = fopen(phaseFile, "r");
@@ -52,7 +31,7 @@ bool loadPhase(const char *phaseFile, Phase *phase) {
             phase->snake_speed, phase->food_points, phase->obstacle_count);
 
     // Aloca memória para os obstáculos
-    phase->obstacles = malloc(sizeof(Point) * phase->obstacle_count);
+    phase->obstacles = malloc(sizeof(Point) * phase->obstacle_count); 
     if (!phase->obstacles) {
         printf("Erro ao alocar memória para obstáculos.\n");
         fclose(file);
@@ -95,27 +74,16 @@ void moveSnake(Snake *snake) {
     snake->body[0].y += snake->dy;
 }
 
-bool checkCollision(Snake *snake, Phase *phase) {
-    // Colisão com as bordas
+bool checkCollision(Snake *snake) {
     if (snake->body[0].x < 0 || snake->body[0].x >= WIDTH ||
         snake->body[0].y < 0 || snake->body[0].y >= HEIGHT) {
         return true;
     }
-    
-    // Colisão com o próprio corpo
     for (int i = 1; i < snake->length; i++) {
         if (snake->body[0].x == snake->body[i].x && snake->body[0].y == snake->body[i].y) {
             return true;
         }
     }
-
-    // Colisão com obstáculos
-    for (int i = 0; i < phase->obstacle_count; i++) {
-        if (snake->body[0].x == phase->obstacles[i].x && snake->body[0].y == phase->obstacles[i].y) {
-            return true;
-        }
-    }
-
     return false;
 }
 
@@ -158,16 +126,16 @@ void draw(SDL_Renderer *renderer, Snake *snake, Food *food, Phase *phase) {
 }
 
 void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame) {
-    // Limpa a tela e define a cor de fundo
+    // Clear screen and set background color
     SDL_SetRenderDrawColor(renderer, 78, 1, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Desenha o botão
+    // Draw button
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_Rect buttonRect = {WIDTH / 2 - 100, HEIGHT / 2 - 25, 200, 50};
     SDL_RenderFillRect(renderer, &buttonRect);
 
-    // Renderiza o texto no botão
+    // Render text on button
     SDL_Color white = {255, 255, 255, 255};
     SDL_Surface *textSurface = TTF_RenderText_Blended(font, "Iniciar Jogo", white);
     SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -178,9 +146,9 @@ void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame) {
     SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
     SDL_DestroyTexture(textTexture);
 
-    SDL_RenderPresent(renderer);  // Atualiza a tela
+    SDL_RenderPresent(renderer);  // Update screen
 
-    // Espera o usuário clicar ou sair
+    // Wait for user to click or quit
     SDL_Event event;
     while (!*startGame) {
         while (SDL_PollEvent(&event)) {
@@ -198,89 +166,4 @@ void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame) {
             }
         }
     }
-}
-
-int main() {
-    // Inicialização do SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0 || TTF_Init() == -1) {
-        printf("Erro ao inicializar o SDL: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    SDL_Window *window = SDL_CreateWindow("Jogo da Cobra",
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
-    if (!window) {
-        printf("Erro ao criar janela: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (!renderer) {
-        printf("Erro ao criar renderizador: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    // Carregar a fonte
-    TTF_Font *font = TTF_OpenFont("assets/font.ttf", 24);
-    if (!font) {
-        printf("Erro ao carregar a fonte: %s\n", TTF_GetError());
-        return 1;
-    }
-
-    // Variáveis do jogo
-    Snake snake;
-    Food food;
-    Phase phase;
-
-    // Inicializa o jogo
-    init(&snake, &food);
-
-    bool startGame = false;
-    drawStartScreen(renderer, font, &startGame);
-
-    // Carrega a fase
-    char phaseFile[100];
-    sprintf(phaseFile, "assets/phase1.txt");
-    if (!loadPhase(phaseFile, &phase)) {
-        printf("Falha ao carregar a fase.\n");
-        return 1;
-    }
-
-    // Jogo em execução
-    while (!startGame) {
-        // Evento de quit
-        SDL_Event e;
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
-                startGame = true;
-            }
-        }
-
-        moveSnake(&snake);
-        if (checkCollision(&snake, &phase)) {
-            printf("Colisão! Fim de jogo.\n");
-            break;
-        }
-
-        if (checkFoodCollision(&snake, &food)) {
-            printf("Comida coletada!\n");
-        }
-
-        // Atualiza o estado do jogo
-        draw(renderer, &snake, &food, &phase);
-        SDL_Delay(100); // Ajuste de velocidade do jogo
-    }
-
-    // Exibe as estatísticas finais
-    show_statistics();
-
-    // Finaliza recursos do SDL
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_CloseFont(font);
-    SDL_Quit();
-    TTF_Quit();
-
-    return 0;
 }

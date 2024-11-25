@@ -1,8 +1,5 @@
 #include "game.h"
 
-#define WIDTH 1280   // Definindo a largura da janela
-#define HEIGHT 720   // Definindo a altura da janela
-
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -22,7 +19,6 @@ int main(int argc, char *argv[]) {
         printf("SDL_ttf Inicializado com sucesso.\n");
     }
 
-    // Criando a janela com as dimensões corretas
     SDL_Window *window = SDL_CreateWindow("Jogo da Cobrinha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
     if (!window) {
         printf("Erro ao criar a janela SDL: %s\n", SDL_GetError());
@@ -44,7 +40,6 @@ int main(int argc, char *argv[]) {
         printf("Renderizador SDL criado com sucesso.\n");
     }
 
-    // Carregando a fonte
     TTF_Font *font = TTF_OpenFont("/System/Library/Fonts/Supplemental/Arial.ttf", 24);
     if (!font) {
         printf("Erro ao abrir a fonte: %s\n", TTF_GetError());
@@ -57,19 +52,21 @@ int main(int argc, char *argv[]) {
         printf("Fonte carregada com sucesso.\n");
     }
 
+    // Tela inicial
+    bool startGame = false;
+    drawStartScreen(renderer, font, &startGame);
+
     // Inicialização do jogo
     Snake snake;
     Food food;
     init(&snake, &food);
 
-    // Variáveis para controle de seleção de opções do menu
-    bool startGame = false;
-    bool gameMode = false;  // Variável para alternar o modo de jogo
-    bool showStats = false; // Variável para exibir estatísticas
+    // Configuração inicial das fases
     int currentPhase = 1;
-    char phaseFile[500];  // Buffer ajustado para tamanho seguro
+    char phaseFile[500];  // Garantir que o buffer tenha tamanho suficiente
     sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
 
+    // Debug: Verificando o caminho do arquivo
     printf("Tentando abrir o arquivo: %s\n", phaseFile);
 
     Phase phase;
@@ -92,7 +89,6 @@ int main(int argc, char *argv[]) {
     Uint32 lastTick = SDL_GetTicks();
 
     while (running) {
-        // Processar eventos
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
@@ -123,52 +119,40 @@ int main(int argc, char *argv[]) {
                             snake.dy = 0;
                         }
                         break;
-                    case SDLK_RETURN:  // Aperta ENTER para alternar entre modos de jogo
-                        gameMode = !gameMode;
-                        break;
-                    case SDLK_s:  // Aperta "S" para mostrar as estatísticas
-                        showStats = !showStats;
-                        break;
                 }
             }
         }
 
-        // Desenha a tela inicial e o menu
-        drawStartScreen(renderer, font, &startGame);  // Corrigido para passar apenas 3 parâmetros
+        Uint32 currentTick = SDL_GetTicks();
+        if ((int)(currentTick - lastTick) > phase.snake_speed) {
+            moveSnake(&snake);
 
-        // Se o jogo está pronto para começar
-        if (startGame) {
-            Uint32 currentTick = SDL_GetTicks();
-            if ((int)(currentTick - lastTick) > phase.snake_speed) {
-                moveSnake(&snake);
+            if (checkCollision(&snake)) {
+                printf("Fim de jogo! Sua pontuação: %d\n", score);
+                running = false;
+                break;
+            }
 
-                if (checkCollision(&snake)) {
-                    printf("Fim de jogo! Sua pontuação: %d\n", score);
-                    running = false;
-                    break;
-                }
+            if (checkFoodCollision(&snake, &food)) {
+                score++;
+                printf("Pontuação: %d\n", score);
 
-                if (checkFoodCollision(&snake, &food)) {
-                    score++;
-                    printf("Pontuação: %d\n", score);
+                if (score >= phase.food_points) {
+                    currentPhase++;
+                    sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
 
-                    if (score >= phase.food_points) {
-                        currentPhase++;
-                        sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
-
-                        if (!loadPhase(phaseFile, &phase)) {
-                            printf("Parabéns! Você completou todas as fases!\n");
-                            running = false;
-                        } else {
-                            printf("Fase %d carregada!\n", currentPhase);
-                            init(&snake, &food);  // Reinicializa para nova fase
-                        }
+                    if (!loadPhase(phaseFile, &phase)) {
+                        printf("Parabéns! Você completou todas as fases!\n");
+                        running = false;
+                    } else {
+                        printf("Fase %d carregada!\n", currentPhase);
+                        init(&snake, &food);  // Reinicializa o jogo para a nova fase
                     }
                 }
-
-                draw(renderer, &snake, &food, &phase); 
-                lastTick = currentTick;
             }
+
+            draw(renderer, &snake, &food, &phase); // Adiciona obstáculos ao desenho
+            lastTick = currentTick;
         }
     }
 
