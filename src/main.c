@@ -1,48 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <stdbool.h>
-
-// Constantes
-#define WIDTH 1280   // Largura da janela
-#define HEIGHT 720   // Altura da janela
-#define BLOCK_SIZE 20
-
-// Estruturas
-typedef struct {
-    int x, y;
-    int dx, dy;
-    int length;
-    SDL_Point body[100]; // Corpo da cobra com no máximo 100 segmentos
-} Snake;
-
-typedef struct {
-    int x, y;
-} Food;
-
-typedef struct {
-    int snake_speed;     // Velocidade da cobra (ms entre atualizações)
-    int food_points;     // Pontos necessários para passar de fase
-    int obstacle_count;  // Número de obstáculos na fase
-} Phase;
-
-// Funções
-void drawStartScreen(SDL_Renderer *renderer, TTF_Font *font, bool *startGame, int apples, int moves);
-void init(Snake *snake, Food *food);
-void moveSnake(Snake *snake);
-bool checkCollision(Snake *snake);
-bool checkFoodCollision(Snake *snake, Food *food);
-void draw(SDL_Renderer *renderer, Snake *snake, Food *food, Phase *phase);
-bool loadPhase(const char *filename, Phase *phase);
-
-#endif // GAME_H
-
 #include "game.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
@@ -63,8 +19,7 @@ int main(int argc, char *argv[]) {
         printf("SDL_ttf Inicializado com sucesso.\n");
     }
 
-    SDL_Window *window = SDL_CreateWindow(
-        "Jogo da Cobrinha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
+    SDL_Window *window = SDL_CreateWindow("Jogo da Cobrinha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
     if (!window) {
         printf("Erro ao criar a janela SDL: %s\n", SDL_GetError());
         TTF_Quit();
@@ -97,11 +52,9 @@ int main(int argc, char *argv[]) {
         printf("Fonte carregada com sucesso.\n");
     }
 
-    // Tela inicial com estatísticas
+    // Tela inicial
     bool startGame = false;
-    int apples = 0;
-    int moves = 0;
-    drawStartScreen(renderer, font, &startGame, apples, moves);
+    drawStartScreen(renderer, font, &startGame);
 
     // Inicialização do jogo
     Snake snake;
@@ -110,7 +63,7 @@ int main(int argc, char *argv[]) {
 
     // Configuração inicial das fases
     int currentPhase = 1;
-    char phaseFile[500]; // Garantir que o buffer tenha tamanho suficiente
+    char phaseFile[500];  // Garantir que o buffer tenha tamanho suficiente
     sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
 
     // Debug: Verificando o caminho do arquivo
@@ -126,7 +79,7 @@ int main(int argc, char *argv[]) {
         SDL_Quit();
         return 1;
     } else {
-        printf("Fase inicial carregada: velocidade=%d, pontos=%d, obstáculos=%d\n",
+        printf("Fase inicial carregada: velocidade=%d, pontos=%d, obstáculos=%d\n", 
                phase.snake_speed, phase.food_points, phase.obstacle_count);
     }
 
@@ -182,8 +135,6 @@ int main(int argc, char *argv[]) {
 
             if (checkFoodCollision(&snake, &food)) {
                 score++;
-                apples++;
-                moves++;
                 printf("Pontuação: %d\n", score);
 
                 if (score >= phase.food_points) {
