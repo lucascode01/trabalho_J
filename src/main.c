@@ -1,4 +1,7 @@
 #include "game.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
@@ -19,7 +22,8 @@ int main(int argc, char *argv[]) {
         printf("SDL_ttf Inicializado com sucesso.\n");
     }
 
-    SDL_Window *window = SDL_CreateWindow("Jogo da Cobrinha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
+    SDL_Window *window = SDL_CreateWindow(
+        "Jogo da Cobrinha", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
     if (!window) {
         printf("Erro ao criar a janela SDL: %s\n", SDL_GetError());
         TTF_Quit();
@@ -52,9 +56,11 @@ int main(int argc, char *argv[]) {
         printf("Fonte carregada com sucesso.\n");
     }
 
-    // Tela inicial
+    // Tela inicial com estatísticas
     bool startGame = false;
-    drawStartScreen(renderer, font, &startGame);
+    int apples = 0;
+    int moves = 0;
+    drawStartScreen(renderer, font, &startGame, apples, moves);
 
     // Inicialização do jogo
     Snake snake;
@@ -63,7 +69,7 @@ int main(int argc, char *argv[]) {
 
     // Configuração inicial das fases
     int currentPhase = 1;
-    char phaseFile[500];  // Garantir que o buffer tenha tamanho suficiente
+    char phaseFile[500]; // Garantir que o buffer tenha tamanho suficiente
     sprintf(phaseFile, "%s/phase%d.txt", "/Users/lucassantos/Desktop/A/DFSC/C/Work/Salles/CodeLive/Faculdade/AP/jogo-da-cobrinha/assets", currentPhase);
 
     // Debug: Verificando o caminho do arquivo
@@ -79,7 +85,7 @@ int main(int argc, char *argv[]) {
         SDL_Quit();
         return 1;
     } else {
-        printf("Fase inicial carregada: velocidade=%d, pontos=%d, obstáculos=%d\n", 
+        printf("Fase inicial carregada: velocidade=%d, pontos=%d, obstáculos=%d\n",
                phase.snake_speed, phase.food_points, phase.obstacle_count);
     }
 
@@ -135,6 +141,8 @@ int main(int argc, char *argv[]) {
 
             if (checkFoodCollision(&snake, &food)) {
                 score++;
+                apples++;
+                moves++;
                 printf("Pontuação: %d\n", score);
 
                 if (score >= phase.food_points) {
